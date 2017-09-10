@@ -14,9 +14,19 @@
     overflow: auto;
 }
 
-/*.block {    
-    border: black 3px solid;
-    border-radius: 8px;
-}*/
+.links {
+    position: absolute;
+    margin-top: 20px;
+    margin-left: 20px;
+    color: #11799D;
+    cursor:pointer;
+    text-decoration:underline;
+    
+}
 
-
+.coords {
+    position: absolute;
+    margin-top: 20px;
+    margin-left: 220px;
+    color: #11799D;        
+}

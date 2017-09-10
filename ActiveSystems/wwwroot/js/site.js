@@ -39,23 +39,27 @@ var crossbar = (function() {
         this.circles.push(new circle(this.canvas, this.ctx, x1, y1)); 
         this.circles.push(new circle(this.canvas, this.ctx, x2, y2));                 
 
+        this.links = $("#links");
+
         this.dragCircle = null;
 
-        this.canvas.mousedown(function(e) {
+        this.body = $("body");
+
+        this.body.mousedown(function(e) {
             self.handleMouseDown(e);
         });
 
-        this.canvas.mouseup(function(e) {
+        this.body.mouseup(function(e) {
             self.handleMouseUp(e);
         });
 
-        this.canvas.mousemove(function(e) {
+        this.body.mousemove(function(e) {
             self.handleMouseMove(e);
         });
 
-        this.canvas.mouseout(function(e) {
+        this.canvas.mouseleave(function(e) {
             self.handleOut(e);
-        });
+        });        
     }
 
     crossbar.prototype.draw = function() {
@@ -93,7 +97,11 @@ var crossbar = (function() {
         this.ctx.stroke();
     }
 
-    crossbar.prototype.handleOut = function(e) {
+    crossbar.prototype.handleOut = function(e) {     
+        var target = e.relatedTarget;
+        if (target.id == "linkSave" || target.id == "linkUpdate" || target.id == "coordFirst" || target.id == "coordSecond")
+            return;
+
         this.dragCircle = null;
     }
 
