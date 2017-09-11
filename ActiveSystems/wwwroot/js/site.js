@@ -5,7 +5,7 @@
         this.canvas.canvasHeight = 400;
         this.ctx = this.canvas.get(0).getContext("2d");
         this.crossbar = this.getCrossbar();
-        this.crossbar.draw();
+        this.crossbar.draw();        
     }
 
     app.prototype.getCrossbar = function() {
@@ -36,14 +36,13 @@ var crossbar = (function() {
         this.offsetY = this.canvasOffset.top;
         
         this.circles = [];
-        this.circles.push(new circle(this.canvas, this.ctx, x1, y1)); 
-        this.circles.push(new circle(this.canvas, this.ctx, x2, y2));                 
+        this.circles.push(new circle(this.canvas, this.ctx, x1, y1, $("#coordFirst"), "First point")); 
+        this.circles.push(new circle(this.canvas, this.ctx, x2, y2, $("#coordSecond"), "Second point"));                 
 
         this.links = $("#links");
+        this.body = $("body");        
 
         this.dragCircle = null;
-
-        this.body = $("body");
 
         this.body.mousedown(function(e) {
             self.handleMouseDown(e);
@@ -59,7 +58,11 @@ var crossbar = (function() {
 
         this.canvas.mouseleave(function(e) {
             self.handleOut(e);
-        });        
+        });      
+
+        this.canvas.mouseenter(function (e) {
+            self.handleIn(e);
+        });      
     }
 
     crossbar.prototype.draw = function() {
@@ -102,7 +105,29 @@ var crossbar = (function() {
         if (target.id == "linkSave" || target.id == "linkUpdate" || target.id == "coordFirst" || target.id == "coordSecond")
             return;
 
-        this.dragCircle = null;
+        //this.dragCircle = null;
+    }
+
+    crossbar.prototype.handleIn = function (e) {
+        var target = e.relatedTarget;
+        if (this.dragCircle == null)
+            return;
+        mouseX = parseInt(e.clientX - this.offsetX);
+        mouseY = parseInt(e.clientY - this.offsetY);
+
+        var dx = mouseX - lastX;
+        var dy = mouseY - lastY;
+
+        lastX = mouseX;
+        lastY = mouseY;
+
+        var x = this.dragCircle.x += dx;
+        var y = this.dragCircle.y += dy;
+
+        this.dragCircle.x = x;
+        this.dragCircle.y = y;
+
+        this.draw();
     }
 
     crossbar.prototype.handleMouseDown = function(e) {
@@ -144,6 +169,8 @@ var crossbar = (function() {
         this.draw();
     }
 
+
+
     crossbar.prototype.getHitCircle = function(x, y) {
         for (var ii = 0; ii < this.circles.length; ii++) {
             if (this.circles[ii].hitCheck(x, y)) {
@@ -158,13 +185,16 @@ var crossbar = (function() {
 })();
 
 var circle = (function() {
-    function circle(canvas, ctx, x, y) {
+    function circle(canvas, ctx, x, y, elPoint, elText) {
         var self = this;
 
         this.canvas = canvas;
         this.ctx = ctx;
         this.x = x;
         this.y = y;
+
+        this.elPoint = elPoint;
+        this.elText = elText;
 
         this.radius = 3;
         this.color = "white";
@@ -175,7 +205,8 @@ var circle = (function() {
         this.ctx.beginPath();
         this.ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
         this.ctx.fillStyle = this.color;
-        this.ctx.fill();    
+        this.ctx.fill();
+        this.elPoint.text(this.elText + ":" + parseInt(this.x) + ";" + parseInt(this.y));
     }
 
     circle.prototype.normalizeCoors = function() {
