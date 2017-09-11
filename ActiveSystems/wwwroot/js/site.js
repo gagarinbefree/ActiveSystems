@@ -1,31 +1,19 @@
 ﻿var app = (function() {
-    function app() {
+    function app(model) {
+        this.model = model;
         this.canvas = $("#cnvs");
-        this.canvas.canvasWidth = 400;
-        this.canvas.canvasHeight = 400;
+        this.canvas.canvasWidth = model.canvasSize.x;
+        this.canvas.canvasHeight = model.canvasSize.y;
         this.ctx = this.canvas.get(0).getContext("2d");
-        this.crossbar = this.getCrossbar();
-        this.crossbar.draw();        
-    }
-
-    app.prototype.getCrossbar = function() {
-        return new crossbar(this.canvas, this.ctx,
-            this.rnd(0, this.canvas.canvasWidth),
-            this.rnd(0, this.canvas.canvasHeight),
-            this.rnd(0, this.canvas.canvasWidth),
-            this.rnd(0, this.canvas.canvasHeight)
-        );
-    }
-
-    app.prototype.rnd = function(min, max) {
-        return Math.random() * (max - min) + min;
+        this.crossbar = new crossbar(this.canvas, this.ctx, model);
+        this.crossbar.draw();      
     }
 
     return app;
 })();
 
 var crossbar = (function() {
-    function crossbar(canvas, ctx, x1, y1, x2, y2) {
+    function crossbar(canvas, ctx, model) {
         var self = this;
 
         this.canvas = canvas;
@@ -34,10 +22,11 @@ var crossbar = (function() {
         this.canvasOffset = this.canvas.offset();
         this.offsetX = this.canvasOffset.left;
         this.offsetY = this.canvasOffset.top;
-        
+
+        this.color = model.crossBar.color;
         this.circles = [];
-        this.circles.push(new circle(this.canvas, this.ctx, x1, y1, $("#coordFirst"), "First point")); 
-        this.circles.push(new circle(this.canvas, this.ctx, x2, y2, $("#coordSecond"), "Second point"));                 
+        this.circles.push(new circle(this.canvas, this.ctx, model.crossBar.points[0].x, model.crossBar.points[0].y, $("#coordFirst"), "First point")); 
+        this.circles.push(new circle(this.canvas, this.ctx, model.crossBar.points[1].x, model.crossBar.points[1].y, $("#coordSecond"), "Second point"));                 
 
         this.links = $("#links");
         this.body = $("body");        
@@ -60,9 +49,9 @@ var crossbar = (function() {
             self.handleOut(e);
         });      
 
-        this.canvas.mouseenter(function (e) {
-            self.handleIn(e);
-        });      
+        //this.canvas.mouseenter(function (e) {
+        //    self.handleIn(e);
+        //});      
     }
 
     crossbar.prototype.draw = function() {
@@ -73,7 +62,8 @@ var crossbar = (function() {
             this.circles[0].x,
             this.circles[0].y,
             this.circles[1].x,
-            this.circles[1].y
+            this.circles[1].y,
+            this.color
         );
         this.line.draw();
 
@@ -105,31 +95,9 @@ var crossbar = (function() {
         if (target.id == "linkSave" || target.id == "linkUpdate" || target.id == "coordFirst" || target.id == "coordSecond")
             return;
 
-        //this.dragCircle = null;
+        this.dragCircle = null;
     }
-
-    crossbar.prototype.handleIn = function (e) {
-        var target = e.relatedTarget;
-        if (this.dragCircle == null)
-            return;
-        mouseX = parseInt(e.clientX - this.offsetX);
-        mouseY = parseInt(e.clientY - this.offsetY);
-
-        var dx = mouseX - lastX;
-        var dy = mouseY - lastY;
-
-        lastX = mouseX;
-        lastY = mouseY;
-
-        var x = this.dragCircle.x += dx;
-        var y = this.dragCircle.y += dy;
-
-        this.dragCircle.x = x;
-        this.dragCircle.y = y;
-
-        this.draw();
-    }
-
+    
     crossbar.prototype.handleMouseDown = function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -229,7 +197,7 @@ var circle = (function() {
 })();
 
 var line = (function() {
-    function line(canvas, ctx, x1, y1, x2, y2) {
+    function line(canvas, ctx, x1, y1, x2, y2, color) {
         var self = this;
 
         this.canvas = canvas;
@@ -238,7 +206,7 @@ var line = (function() {
         this.y1 = y1;
         this.x2 = x2;
         this.y2 = y2;
-        this.color = "red";
+        this.color = color;
         this.width = 2;
     }
 

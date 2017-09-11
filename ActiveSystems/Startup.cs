@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Session;
+using Microsoft.Extensions.Caching.Memory;
+using ActiveSystems.Contracts;
+using ActiveSystems.Models;
 
 namespace ActiveSystems
 {
@@ -27,8 +31,13 @@ namespace ActiveSystems
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMemoryCache();
+
             // Add framework services.
             services.AddMvc();
+
+            //services.AddTransient<ICommander>(f => new Commands(f.GetService<IMemoryCache>()));
+            services.AddTransient<ICommander, Commands>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

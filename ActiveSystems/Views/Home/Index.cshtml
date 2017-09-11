@@ -1,4 +1,6 @@
-﻿@{
+﻿@model ActiveSystems.Models.ViewModel
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
@@ -20,7 +22,9 @@
 @section Scripts {
     <script type="text/javascript">
         $(document).ready(function () {
-            var application = new app();
+            var model = @(Html.Raw(Json.Serialize(Model)));
+
+            var application = new app(model);
         });
     </script>
 }
