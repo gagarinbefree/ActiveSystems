@@ -1,7 +1,7 @@
 ﻿@model ActiveSystems.Models.ViewModel
 
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "ActiveSystems";
 }
 
 <div class="parent">
@@ -14,8 +14,7 @@
             <div id="coordFirst"></div>
             <div id="coordSecond"></div>
         </div>        
-
-        <canvas id="cnvs" width="400" height="400"></canvas>
+        <canvas id="cnvs" width="@Model.CanvasSize.X" height="@Model.CanvasSize.Y"></canvas>
     </div>
 </div>
 
@@ -23,7 +22,6 @@
     <script type="text/javascript">
         $(document).ready(function () {
             var model = @(Html.Raw(Json.Serialize(Model)));
-
             var application = new app(model);
         });
     </script>
