@@ -1,16 +1,30 @@
 ﻿var app = (function() {
     function app(model) {
+        var self = this;
 
         // viewmodel
         this.model = model;
 
         this.canvas = $("#cnvs");
-        this.canvas.canvasWidth = model.canvasSize.x;
-        this.canvas.canvasHeight = model.canvasSize.y;
+        this.canvas.canvasWidth = model.CanvasSize.X;
+        this.canvas.canvasHeight = model.CanvasSize.Y;
         this.ctx = this.canvas.get(0).getContext("2d");
 
-        this.crossbar = new crossbar(this.canvas, this.ctx, model.crossbar);
+        this.updateSegmentEl = $("#linkSave");
+        this.updateSegmentEl.click(function () { self.postModel() });
+
+        this.crossbar = new crossbar(this.canvas, this.ctx, model.Crossbar);
         this.crossbar.draw();      
+    }
+
+    app.prototype.postModel = function () {
+        $.ajax({
+            type: "POST",
+            url: "Home/PostModel",
+            data: JSON.stringify(this.model),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+        });
     }
 
     return app;
@@ -31,8 +45,8 @@ var crossbar = (function() {
         this.offsetY = this.canvasOffset.top;
         
         this.circles = [];
-        this.circles.push(new circle(this.canvas, this.ctx, this.model.points[0], $("#coordFirst"), "First point")); 
-        this.circles.push(new circle(this.canvas, this.ctx, this.model.points[1], $("#coordSecond"), "Second point"));                 
+        this.circles.push(new circle(this.canvas, this.ctx, this.model.Points[0], $("#coordFirst"), "First point")); 
+        this.circles.push(new circle(this.canvas, this.ctx, this.model.Points[1], $("#coordSecond"), "Second point"));                 
 
         this.links = $("#links");
         this.body = $("body");        
@@ -123,8 +137,8 @@ var crossbar = (function() {
         lastX = mouseX;
         lastY = mouseY;
 
-        var x = this.dragCircle.model.x += dx;
-        var y = this.dragCircle.model.y += dy;
+        var x = this.dragCircle.model.X += dx;
+        var y = this.dragCircle.model.Y += dy;
 
         this.dragCircle.x = x;
         this.dragCircle.y = y;
@@ -165,22 +179,22 @@ var circle = (function() {
     circle.prototype.draw = function() {
         this.normalizeCoors();
         this.ctx.beginPath();
-        this.ctx.arc(this.model.x, this.model.y, this.radius, 0, 2 * Math.PI, false);
+        this.ctx.arc(this.model.X, this.model.Y, this.radius, 0, 2 * Math.PI, false);
         this.ctx.fillStyle = this.color;
         this.ctx.fill();
-        this.elPoint.text(this.elText + ":" + parseInt(this.model.x) + ";" + parseInt(this.model.y));
+        this.elPoint.text(this.elText + ":" + parseInt(this.model.X) + ";" + parseInt(this.model.Y));
     }
 
     circle.prototype.normalizeCoors = function() {
-        if (this.model.x < 0) this.model.x = 0;
-        if (this.model.y < 0) this.model.y = 0;
-        if (this.model.x > this.canvas.canvasWidth) this.model.x = this.canvas.canvasWidth;
-        if (this.model.y > this.canvas.canvasHeight) this.model.y = this.canvas.canvasHeight;
+        if (this.model.X < 0) this.model.X = 0;
+        if (this.model.Y < 0) this.model.Y = 0;
+        if (this.model.X > this.canvas.canvasWidth) this.model.X = this.canvas.canvasWidth;
+        if (this.model.Y > this.canvas.canvasHeight) this.model.Y = this.canvas.canvasHeight;
     }
 
     circle.prototype.hitCheck = function (x, y) {
-        var dx = x - this.model.x;
-        var dy = y - this.model.y;
+        var dx = x - this.model.X;
+        var dy = y - this.model.Y;
         
         return dx * dx + dy * dy < this.radius * 10;
     }
@@ -202,10 +216,10 @@ var line = (function() {
 
     line.prototype.draw = function() {
         this.ctx.beginPath();
-        this.ctx.moveTo(this.model.points[0].x, this.model.points[0].y);
-        this.ctx.lineTo(this.model.points[1].x, this.model.points[1].y);
+        this.ctx.moveTo(this.model.Points[0].X, this.model.Points[0].Y);
+        this.ctx.lineTo(this.model.Points[1].X, this.model.Points[1].Y);
         this.ctx.lineWidth = this.width;
-        this.ctx.strokeStyle = this.model.color;
+        this.ctx.strokeStyle = this.model.Color;
         this.ctx.stroke();      
     }    
 

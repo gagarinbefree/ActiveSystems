@@ -12,7 +12,7 @@ namespace ActiveSystems.Controllers
 {
     public class HomeController : Controller
     {
-        private string _key = "ActiveSystems.Id";
+        private string _key = "ActiveSystems.Model.Id";
         private ICommander _cmd;
 
         public HomeController(ICommander cmd)
@@ -21,7 +21,7 @@ namespace ActiveSystems.Controllers
         }
 
         public IActionResult Index()
-        {
+        {            
             ViewModel model;
             if (!HttpContext.Request.Cookies.ContainsKey(_key))
             {
@@ -39,7 +39,7 @@ namespace ActiveSystems.Controllers
         }
 
         [HttpPost]
-        public void PostModel(ViewModel model)
+        public void PostModel([FromBody] ViewModel model)
         {
             _cmd.SaveModel(model);
         }

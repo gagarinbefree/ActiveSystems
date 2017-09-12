@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Session;
 using Microsoft.Extensions.Caching.Memory;
 using ActiveSystems.Contracts;
 using ActiveSystems.Models;
+using Newtonsoft.Json.Serialization;
 
 namespace ActiveSystems
 {
@@ -34,7 +35,7 @@ namespace ActiveSystems
             services.AddMemoryCache();
 
             // Add framework services.
-            services.AddMvc();
+            services.AddMvc().AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
 
             //services.AddTransient<ICommander>(f => new Commands(f.GetService<IMemoryCache>()));
             services.AddTransient<ICommander, Commands>();
