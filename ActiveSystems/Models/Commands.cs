@@ -26,9 +26,9 @@ namespace ActiveSystems.Models
 
             model.Id = Guid.NewGuid().ToString();
             model.CanvasSize = new Point { X = canvasWidth, Y = canvasHeight };            
-            model.CrossBar.Color = _getRandomColor();
-            model.CrossBar.Points.Add(_getRandomPoint());
-            model.CrossBar.Points.Add(_getRandomPoint());
+            model.Crossbar.Color = _getRandomColor();
+            model.Crossbar.Points.Add(_getRandomPoint());
+            model.Crossbar.Points.Add(_getRandomPoint());
 
             return model;
         }
@@ -45,7 +45,7 @@ namespace ActiveSystems.Models
             if (!_cache.TryGetValue(id, out model))
                 model = CreateModel();
 
-            model.CrossBar.Color = _getRandomColor();
+            model.Crossbar.Color = _getRandomColor();
 
             return model;
         }

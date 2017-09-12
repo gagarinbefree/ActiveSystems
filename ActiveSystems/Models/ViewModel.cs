@@ -9,6 +9,6 @@ namespace ActiveSystems.Models
     {
         public string Id { set; get; }
         public Point CanvasSize { set; get; }
-        public CrossBar CrossBar { set; get; } = new CrossBar();
+        public CrossBar Crossbar { set; get; } = new CrossBar();
     }
 }

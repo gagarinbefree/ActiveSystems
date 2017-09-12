@@ -1,11 +1,15 @@
 ﻿var app = (function() {
     function app(model) {
+
+        // viewmodel
         this.model = model;
+
         this.canvas = $("#cnvs");
         this.canvas.canvasWidth = model.canvasSize.x;
         this.canvas.canvasHeight = model.canvasSize.y;
         this.ctx = this.canvas.get(0).getContext("2d");
-        this.crossbar = new crossbar(this.canvas, this.ctx, model);
+
+        this.crossbar = new crossbar(this.canvas, this.ctx, model.crossbar);
         this.crossbar.draw();      
     }
 
@@ -16,17 +20,19 @@ var crossbar = (function() {
     function crossbar(canvas, ctx, model) {
         var self = this;
 
+        // crossbar
+        this.model = model;
+
         this.canvas = canvas;
         this.ctx = ctx;
 
         this.canvasOffset = this.canvas.offset();
         this.offsetX = this.canvasOffset.left;
         this.offsetY = this.canvasOffset.top;
-
-        this.color = model.crossBar.color;
+        
         this.circles = [];
-        this.circles.push(new circle(this.canvas, this.ctx, model.crossBar.points[0].x, model.crossBar.points[0].y, $("#coordFirst"), "First point")); 
-        this.circles.push(new circle(this.canvas, this.ctx, model.crossBar.points[1].x, model.crossBar.points[1].y, $("#coordSecond"), "Second point"));                 
+        this.circles.push(new circle(this.canvas, this.ctx, this.model.points[0], $("#coordFirst"), "First point")); 
+        this.circles.push(new circle(this.canvas, this.ctx, this.model.points[1], $("#coordSecond"), "Second point"));                 
 
         this.links = $("#links");
         this.body = $("body");        
@@ -48,23 +54,12 @@ var crossbar = (function() {
         this.canvas.mouseleave(function(e) {
             self.handleOut(e);
         });      
-
-        //this.canvas.mouseenter(function (e) {
-        //    self.handleIn(e);
-        //});      
     }
 
     crossbar.prototype.draw = function() {
         this.ctx.clearRect(0, 0, this.canvas.canvasWidth, this.canvas.canvasWidth);        
 
-        this.line = new line(this.canvas,
-            this.ctx,
-            this.circles[0].x,
-            this.circles[0].y,
-            this.circles[1].x,
-            this.circles[1].y,
-            this.color
-        );
+        this.line = new line(this.canvas, this.ctx, this.model);
         this.line.draw();
 
         this.circles[0].draw();
@@ -115,29 +110,27 @@ var crossbar = (function() {
     crossbar.prototype.handleMouseMove = function(e) {
         if (this.dragCircle == null)
             return;
-        
+
         e.preventDefault();
         e.stopPropagation();
 
         mouseX = parseInt(e.clientX - this.offsetX);
         mouseY = parseInt(e.clientY - this.offsetY);
-
+       
         var dx = mouseX - lastX;
         var dy = mouseY - lastY;
 
         lastX = mouseX;
         lastY = mouseY;
 
-        var x = this.dragCircle.x += dx;
-        var y = this.dragCircle.y += dy;
-        
+        var x = this.dragCircle.model.x += dx;
+        var y = this.dragCircle.model.y += dy;
+
         this.dragCircle.x = x;
         this.dragCircle.y = y;
 
         this.draw();
     }
-
-
 
     crossbar.prototype.getHitCircle = function(x, y) {
         for (var ii = 0; ii < this.circles.length; ii++) {
@@ -153,13 +146,14 @@ var crossbar = (function() {
 })();
 
 var circle = (function() {
-    function circle(canvas, ctx, x, y, elPoint, elText) {
+    function circle(canvas, ctx, model, elPoint, elText) {
         var self = this;
+
+        // point
+        this.model = model;
 
         this.canvas = canvas;
         this.ctx = ctx;
-        this.x = x;
-        this.y = y;
 
         this.elPoint = elPoint;
         this.elText = elText;
@@ -171,51 +165,47 @@ var circle = (function() {
     circle.prototype.draw = function() {
         this.normalizeCoors();
         this.ctx.beginPath();
-        this.ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
+        this.ctx.arc(this.model.x, this.model.y, this.radius, 0, 2 * Math.PI, false);
         this.ctx.fillStyle = this.color;
         this.ctx.fill();
-        this.elPoint.text(this.elText + ":" + parseInt(this.x) + ";" + parseInt(this.y));
+        this.elPoint.text(this.elText + ":" + parseInt(this.model.x) + ";" + parseInt(this.model.y));
     }
 
     circle.prototype.normalizeCoors = function() {
-        if (this.x < 0) this.x = 0;
-        if (this.y < 0) this.y = 0;
-        if (this.x > this.canvas.canvasWidth) this.x = this.canvas.canvasWidth;
-        if (this.y > this.canvas.canvasHeight) this.y = this.canvas.canvasHeight;
+        if (this.model.x < 0) this.model.x = 0;
+        if (this.model.y < 0) this.model.y = 0;
+        if (this.model.x > this.canvas.canvasWidth) this.model.x = this.canvas.canvasWidth;
+        if (this.model.y > this.canvas.canvasHeight) this.model.y = this.canvas.canvasHeight;
     }
 
-    circle.prototype.hitCheck = function(x, y) {
-        var dx = x - this.x;
-        var dy = y - this.y;
-        if (dx * dx + dy * dy < this.radius * 10)
-            return true;
-
-        return false;
+    circle.prototype.hitCheck = function (x, y) {
+        var dx = x - this.model.x;
+        var dy = y - this.model.y;
+        
+        return dx * dx + dy * dy < this.radius * 10;
     }
 
     return circle;
 })();
 
 var line = (function() {
-    function line(canvas, ctx, x1, y1, x2, y2, color) {
+    function line(canvas, ctx, model) {
         var self = this;
+
+        // crossbar
+        this.model = model;
 
         this.canvas = canvas;
         this.ctx = ctx;
-        this.x1 = x1;
-        this.y1 = y1;
-        this.x2 = x2;
-        this.y2 = y2;
-        this.color = color;
         this.width = 2;
     }
 
     line.prototype.draw = function() {
         this.ctx.beginPath();
-        this.ctx.moveTo(this.x1, this.y1);
-        this.ctx.lineTo(this.x2, this.y2);
+        this.ctx.moveTo(this.model.points[0].x, this.model.points[0].y);
+        this.ctx.lineTo(this.model.points[1].x, this.model.points[1].y);
         this.ctx.lineWidth = this.width;
-        this.ctx.strokeStyle = this.color;
+        this.ctx.strokeStyle = this.model.color;
         this.ctx.stroke();      
     }    
 
